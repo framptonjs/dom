@@ -1,0 +1,26 @@
+{
+  "name": "@frampton/dom",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "rm -rf ./dist/; tsc -p ./tsconfig.json; webpack;",
+    "build:test": "rm -rf ./testing/; tsc -p ./tsconfig.test.json;",
+    "build:run": "npm run build; node ./dist/bundles/frampton-dom.js",
+    "watch": "webpack --watch",
+    "test": "npm run build:test; mocha ./testing/tests/index.js;"
+  },
+  "author": "Kevin Greene <hightimesteddy@gmail.com>",
+  "files": [
+    "dist/"
+  ],
+  "license": "MIT",
+  "devDependencies": {
+    "@types/chai": "3.4.34",
+    "@types/mocha": "2.2.39",
+    "chai": "3.5.0",
+    "mocha": "3.2.0",
+    "typescript": "2.1.6",
+    "webpack": "2.2.1"
+  }
+}

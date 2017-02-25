@@ -1,0 +1,17 @@
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "target": "es2015",
+    "module": "commonjs",
+    "rootDirs": [
+      ".",
+      "./src",
+      "./tests"
+    ],
+    "outDir": "./testing",
+    "noUnusedLocals": false
+  },
+  "files": [
+    "./tests/index.ts"
+  ]
+}
