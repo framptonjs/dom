@@ -23,7 +23,7 @@ describe('utils/diff-classes', function() {
       }
     };
     const actual = diffClasses(class1, class2);
-    const expected = undefined;
+    const expected: ClassAttribute = undefined;
 
     assert.deepEqual(actual, expected);
   });
@@ -47,7 +47,7 @@ describe('utils/diff-classes', function() {
       }
     };
     const actual = diffClasses(class1, class2);
-    const expected = {
+    const expected: ClassAttribute = {
       type: AttrType.CLASS_LIST,
       value: {
         'test-one': false,

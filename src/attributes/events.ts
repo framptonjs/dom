@@ -7,6 +7,11 @@ export const enum EventType {
 }
 
 
+export interface EventSink {
+  (evt: Event): void;
+}
+
+
 export interface EventHandler<T> {
   (evt: Event): T;
 }
@@ -14,6 +19,16 @@ export interface EventHandler<T> {
 
 export interface EventPredicate<T> {
   (evt: T): boolean;
+}
+
+
+export interface PreviousPredicate<T> {
+  (oldVal: T, newVal: T): boolean;
+}
+
+
+export interface EventMapping<A,B> {
+  (evt: A): B;
 }
 
 
@@ -30,7 +45,6 @@ export interface EventMessenger<A,B> {
 export interface DomEventDef<T> {
   type: EventType.DOM;
   name: string;
-  bubbles: boolean;
   handler: EventMessenger<Event,T>;
 }
 
@@ -67,39 +81,24 @@ function makeLifecycleMessenger<T>(fn: LifecycleHandler<T>): EventMessenger<HTML
 }
 
 
+// EVENT TRANSFORMERS
 
-// DOM EVENTS
-
-export function custom<T>(name: string, bubbles: boolean, handler: EventHandler<T>): EventAttribute<T> {
-  return {
-    type: AttrType.EVENT,
-    value: {
-      type: EventType.DOM,
-      name: name,
-      bubbles: bubbles,
-      handler: makeEventMessenger(handler)
-    }
-  };
+function mapHandler<A,B,C>(mapping: EventMapping<B,C>, handler: EventMessenger<A,B>): EventMessenger<A,C> {
+  return function(evt: A, messages: (val: C) => void): void {
+    handler(evt, function(val: B): void {
+      messages(mapping(val));
+    });
+  }
 }
 
 
-function debounceEventDef<T>(delay: number, eventDef: EventDef<T>): EventDef<T> {
-  let timer: number = null;
-
+export function mapEvent<A,B>(mapping: EventMapping<A,B>, eventDef: EventDef<A>): EventDef<B> {
   switch (eventDef.type) {
     case EventType.DOM: {
       return {
         type: EventType.DOM,
         name: eventDef.name,
-        bubbles: eventDef.bubbles,
-        handler: function(evt: Event, messages: (val: T) => void): void {
-          if (!timer) {
-            timer = setTimeout(() => {
-              eventDef.handler(evt, messages);
-              timer = null;
-            }, delay);
-          }
-        }
+        handler: mapHandler(mapping, eventDef.handler)
       };
     }
 
@@ -107,14 +106,53 @@ function debounceEventDef<T>(delay: number, eventDef: EventDef<T>): EventDef<T> 
       return {
         type: EventType.LIFECYCLE,
         name: eventDef.name,
-        handler: function(element: HTMLElement, messages: (val: T) => void): void {
-          if (!timer) {
-            timer = setTimeout(() => {
-              eventDef.handler(element, messages);
-              timer = null;
-            }, delay);
-          }
-        }
+        handler: mapHandler(mapping, eventDef.handler)
+      };
+    }
+  }
+}
+
+
+export function map<A,B>(mapping: EventMapping<A,B>, event: EventAttribute<A>): EventAttribute<B> {
+  return {
+    type: AttrType.EVENT,
+    value: mapEvent(mapping, event.value)
+  }
+}
+
+
+function debounceHandler<A,B>(delay: number, handler: EventMessenger<A,B>): EventMessenger<A,B> {
+  let timer: number = null;
+
+  return function(evt: A, messages: (val: B) => void): void {
+    if (timer) {
+      clearTimeout(timer);
+      timer = null;
+    }
+
+    timer = setTimeout(() => {
+      handler(evt, messages);
+      timer = null;
+    }, delay);
+  }
+}
+
+
+export function debounceEvent<T>(delay: number, eventDef: EventDef<T>): EventDef<T> {
+  switch (eventDef.type) {
+    case EventType.DOM: {
+      return {
+        type: EventType.DOM,
+        name: eventDef.name,
+        handler: debounceHandler(delay, eventDef.handler)
+      };
+    }
+
+    case EventType.LIFECYCLE: {
+      return {
+        type: EventType.LIFECYCLE,
+        name: eventDef.name,
+        handler: debounceHandler(delay, eventDef.handler)
       };
     }
   }
@@ -124,25 +162,29 @@ function debounceEventDef<T>(delay: number, eventDef: EventDef<T>): EventDef<T> 
 export function debounce<T>(delay: number, event: EventAttribute<T>): EventAttribute<T> {
   return {
     type: AttrType.EVENT,
-    value: debounceEventDef(delay, event.value)
+    value: debounceEvent(delay, event.value)
   };
 }
 
 
-function filterEventDef<T>(predicate: EventPredicate<T>, eventDef: EventDef<T>): EventDef<T> {
+function filterHandler<A,B>(predicate: EventPredicate<B>, handler: EventMessenger<A,B>): EventMessenger<A,B> {
+  return function(evt: A, messages: (val: B) => void): void {
+    handler(evt, function(val: B) {
+      if (predicate(val)) {
+        messages(val);
+      }
+    });
+  };
+}
+
+
+export function filterEvent<T>(predicate: EventPredicate<T>, eventDef: EventDef<T>): EventDef<T> {
   switch (eventDef.type) {
     case EventType.DOM: {
       return {
         type: EventType.DOM,
         name: eventDef.name,
-        bubbles: eventDef.bubbles,
-        handler: function(evt: Event, messages: (val: T) => void): void {
-          eventDef.handler(evt, function(val: T) {
-            if (predicate(val)) {
-              messages(val);
-            }
-          });
-        }
+        handler: filterHandler(predicate, eventDef.handler)
       };
     }
 
@@ -150,13 +192,7 @@ function filterEventDef<T>(predicate: EventPredicate<T>, eventDef: EventDef<T>):
       return {
         type: EventType.LIFECYCLE,
         name: eventDef.name,
-        handler: function(element: HTMLElement, messages: (val: T) => void): void {
-          eventDef.handler(element, function(val: T) {
-            if (predicate(val)) {
-              messages(val);
-            }
-          });
-        }
+        handler: filterHandler(predicate, eventDef.handler)
       };
     }
   }
@@ -166,17 +202,27 @@ function filterEventDef<T>(predicate: EventPredicate<T>, eventDef: EventDef<T>):
 export function filter<T>(predicate: EventPredicate<T>, event: EventAttribute<T>): EventAttribute<T> {
   return {
     type: AttrType.EVENT,
-    value: filterEventDef(predicate, event.value)
+    value: filterEvent(predicate, event.value)
   };
 }
 
 
-export interface PreviousPredicate<T> {
-  (oldVal: T, newVal: T): boolean;
+function filterPreviousHandler<A,B>(predicate: PreviousPredicate<B>, handler: EventMessenger<A,B>): EventMessenger<A,B> {
+  let prevVal: B = null;
+
+  return function(evt: A, messages: (val: B) => void): void {
+    handler(evt, function(val: B) {
+      if (predicate(prevVal, val)) {
+        messages(val);
+      }
+
+      prevVal = val;
+    });
+  }
 }
 
 
-function filterPreviousEventDef<T>(predicate: PreviousPredicate<T>, eventDef: EventDef<T>): EventDef<T> {
+export function filterPreviousEvent<T>(predicate: PreviousPredicate<T>, eventDef: EventDef<T>): EventDef<T> {
   let prevVal: T = null;
 
   switch (eventDef.type) {
@@ -184,16 +230,7 @@ function filterPreviousEventDef<T>(predicate: PreviousPredicate<T>, eventDef: Ev
       return {
         type: EventType.DOM,
         name: eventDef.name,
-        bubbles: eventDef.bubbles,
-        handler: function(evt: Event, messages: (val: T) => void): void {
-          eventDef.handler(evt, function(val: T) {
-            if (predicate(prevVal, val)) {
-              messages(val);
-            }
-
-            prevVal = val;
-          });
-        }
+        handler: filterPreviousHandler(predicate, eventDef.handler)
       };
     }
 
@@ -201,15 +238,7 @@ function filterPreviousEventDef<T>(predicate: PreviousPredicate<T>, eventDef: Ev
       return {
         type: EventType.LIFECYCLE,
         name: eventDef.name,
-        handler: function(element: HTMLElement, messages: (val: T) => void): void {
-          eventDef.handler(element, function(val: T) {
-            if (predicate(prevVal, val)) {
-              messages(val);
-            }
-
-            prevVal = val;
-          });
-        }
+        handler: filterPreviousHandler(predicate, eventDef.handler)
       };
     }
   }
@@ -219,7 +248,7 @@ function filterPreviousEventDef<T>(predicate: PreviousPredicate<T>, eventDef: Ev
 export function filterPrevious<T>(predicate: PreviousPredicate<T>, event: EventAttribute<T>): EventAttribute<T> {
   return {
     type: AttrType.EVENT,
-    value: filterPreviousEventDef(predicate, event.value)
+    value: filterPreviousEvent(predicate, event.value)
   };
 }
 
@@ -231,243 +260,261 @@ export function dropRepeats<T>(event: EventAttribute<T>): EventAttribute<T> {
 }
 
 
+// DOM EVENTS
+
+export function custom<T>(name: string, handler: EventHandler<T>): EventAttribute<T> {
+  return {
+    type: AttrType.EVENT,
+    value: {
+      type: EventType.DOM,
+      name: name,
+      handler: makeEventMessenger(handler)
+    }
+  };
+}
+
+
 export function onAbort<T>(handler: EventHandler<T>): EventAttribute<T> {
-  return custom('abort', true, handler);
+  return custom('abort', handler);
 }
 
 
 export function onAnimationEnd<T>(handler: EventHandler<T>): EventAttribute<T> {
-  return custom('animationend', true, handler);
+  return custom('animationend', handler);
 }
 
 
 export function onAnimationIteration<T>(handler: EventHandler<T>): EventAttribute<T> {
-  return custom('animationiteration', true, handler);
+  return custom('animationiteration', handler);
 }
 
 
 export function onAnimationStart<T>(handler: EventHandler<T>): EventAttribute<T> {
-  return custom('animationstart', true, handler);
+  return custom('animationstart', handler);
 }
 
 
 export function onAudioEnd<T>(handler: EventHandler<T>): EventAttribute<T> {
-  return custom('audioend', true, handler);
+  return custom('audioend', handler);
 }
 
 
 export function onAudioStart<T>(handler: EventHandler<T>): EventAttribute<T> {
-  return custom('audiostart', true, handler);
+  return custom('audiostart', handler);
 }
 
 
 export function onBlur<T>(handler: EventHandler<T>): EventAttribute<T> {
-  return custom('blur', false, handler);
+  return custom('blur', handler);
 }
 
 
 export function onCanPlay<T>(handler: EventHandler<T>): EventAttribute<T> {
-  return custom('canplay', true, handler);
+  return custom('canplay', handler);
 }
 
 
 export function onChange<T>(handler: EventHandler<T>): EventAttribute<T> {
-  return custom('change', true, handler);
+  return custom('change', handler);
 }
 
 
 export function onClick<T>(handler: EventHandler<T>): EventAttribute<T> {
-  return custom('click', true, handler);
+  return custom('click', handler);
 }
 
 
 export function onDrag<T>(handler: EventHandler<T>): EventAttribute<T> {
-  return custom('drag', true, handler);
+  return custom('drag', handler);
 }
 
 
 export function onDragEnd<T>(handler: EventHandler<T>): EventAttribute<T> {
-  return custom('dragend', true, handler);
+  return custom('dragend', handler);
 }
 
 
 export function onDragEnter<T>(handler: EventHandler<T>): EventAttribute<T> {
-  return custom('dragenter', true, handler);
+  return custom('dragenter', handler);
 }
 
 
 export function onDragLeave<T>(handler: EventHandler<T>): EventAttribute<T> {
-  return custom('dragleave', true, handler);
+  return custom('dragleave', handler);
 }
 
 
 export function onDragOver<T>(handler: EventHandler<T>): EventAttribute<T> {
-  return custom('dragover', true, handler);
+  return custom('dragover', handler);
 }
 
 
 export function onDragStart<T>(handler: EventHandler<T>): EventAttribute<T> {
-  return custom('dragstart', true, handler);
+  return custom('dragstart', handler);
 }
 
 
 export function onDrop<T>(handler: EventHandler<T>): EventAttribute<T> {
-  return custom('drop', true, handler);
+  return custom('drop', handler);
 }
 
 
 export function onEnded<T>(handler: EventHandler<T>): EventAttribute<T> {
-  return custom('ended', true, handler);
+  return custom('ended', handler);
 }
 
 
 export function onError<T>(handler: EventHandler<T>): EventAttribute<T> {
-  return custom('error', true, handler);
+  return custom('error', handler);
 }
 
 
 export function onFocus<T>(handler: EventHandler<T>): EventAttribute<T> {
-  return custom('focus', false, handler);
+  return custom('focus', handler);
 }
 
 
 export function onFocusIn<T>(handler: EventHandler<T>): EventAttribute<T> {
-  return custom('focusin', true, handler);
+  return custom('focusin', handler);
 }
 
 
 export function onFocusOut<T>(handler: EventHandler<T>): EventAttribute<T> {
-  return custom('focusout', true, handler);
+  return custom('focusout', handler);
 }
 
 
 export function onInput<T>(handler: EventHandler<T>): EventAttribute<T> {
-  return custom('input', true, handler);
+  return custom('input', handler);
 }
 
 
 export function onKeyDown<T>(handler: EventHandler<T>): EventAttribute<T> {
-  return custom('keydown', true, handler);
+  return custom('keydown', handler);
 }
 
 
 export function onKeyPress<T>(handler: EventHandler<T>): EventAttribute<T> {
-  return custom('keypress', true, handler);
+  return custom('keypress', handler);
 }
 
 
 export function onKeyUp<T>(handler: EventHandler<T>): EventAttribute<T> {
-  return custom('keyup', true, handler);
+  return custom('keyup', handler);
 }
 
 
 export function onLoad<T>(handler: EventHandler<T>): EventAttribute<T> {
-  return custom('load', true, handler);
+  return custom('load', handler);
 }
 
 
 export function onMouseOver<T>(handler: EventHandler<T>): EventAttribute<T> {
-  return custom('mouseover', true, handler);
+  return custom('mouseover', handler);
 }
 
 
 export function onMouseOut<T>(handler: EventHandler<T>): EventAttribute<T> {
-  return custom('mouseout', true, handler);
+  return custom('mouseout', handler);
 }
 
 
 export function onMouseEnter<T>(handler: EventHandler<T>): EventAttribute<T> {
-  return custom('mouseenter', true, handler);
+  return custom('mouseenter', handler);
 }
 
 
 export function onMouseLeave<T>(handler: EventHandler<T>): EventAttribute<T> {
-  return custom('mouseleave', true, handler);
+  return custom('mouseleave', handler);
 }
 
 
 export function onPause<T>(handler: EventHandler<T>): EventAttribute<T> {
-  return custom('pause', true, handler);
+  return custom('pause', handler);
 }
 
 
 export function onPlay<T>(handler: EventHandler<T>): EventAttribute<T> {
-  return custom('play', true, handler);
+  return custom('play', handler);
 }
 
 
 export function onPlaying<T>(handler: EventHandler<T>): EventAttribute<T> {
-  return custom('playing', true, handler);
+  return custom('playing', handler);
 }
 
 
 export function onResize<T>(handler: EventHandler<T>): EventAttribute<T> {
-  return custom('resize', true, handler);
+  return custom('resize', handler);
 }
 
 
 export function onScroll<T>(handler: EventHandler<T>): EventAttribute<T> {
-  return custom('scroll', true, handler);
+  return custom('scroll', handler);
 }
 
 
 export function onSeeked<T>(handler: EventHandler<T>): EventAttribute<T> {
-  return custom('seeked', true, handler);
+  return custom('seeked', handler);
 }
 
 
 export function onSeeking<T>(handler: EventHandler<T>): EventAttribute<T> {
-  return custom('seeking', true, handler);
+  return custom('seeking', handler);
 }
 
 
 export function onSelect<T>(handler: EventHandler<T>): EventAttribute<T> {
-  return custom('select', true, handler);
+  return custom('select', handler);
 }
 
 
 export function onStalled<T>(handler: EventHandler<T>): EventAttribute<T> {
-  return custom('stalled', true, handler);
+  return custom('stalled', handler);
 }
 
 
 export function onSubmit<T>(handler: EventHandler<T>): EventAttribute<T> {
-  return custom('submit', true, handler);
+  return custom('submit', handler);
 }
 
 
 export function onTimeUpdate<T>(handler: EventHandler<T>): EventAttribute<T> {
-  return custom('timeupdate', true, handler);
+  return custom('timeupdate', handler);
 }
 
 
 export function onTouchCancel<T>(handler: EventHandler<T>): EventAttribute<T> {
-  return custom('touchcancel', true, handler);
+  return custom('touchcancel', handler);
 }
 
 
 export function onTouchEnd<T>(handler: EventHandler<T>): EventAttribute<T> {
-  return custom('touchend', true, handler);
+  return custom('touchend', handler);
 }
 
 
 export function onTouchLeave<T>(handler: EventHandler<T>): EventAttribute<T> {
-  return custom('touchleave', true, handler);
+  return custom('touchleave', handler);
 }
 
 
 export function onTouchMove<T>(handler: EventHandler<T>): EventAttribute<T> {
-  return custom('touchmove', true, handler);
+  return custom('touchmove', handler);
 }
 
 
 export function onTouchStart<T>(handler: EventHandler<T>): EventAttribute<T> {
-  return custom('touchstart', true, handler);
+  return custom('touchstart', handler);
 }
 
 
+export function onUnload<T>(handler: EventHandler<T>): EventAttribute<T> {
+  return custom('unload', handler);
+}
+
 export function onWheel<T>(handler: EventHandler<T>): EventAttribute<T> {
-  return custom('wheel', true, handler);
+  return custom('wheel', handler);
 }
 
 

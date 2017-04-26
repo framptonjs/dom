@@ -10,8 +10,11 @@ import {
 
 // EVENTS
 
-export { map } from './events/map';
-export { filter } from './events/filter';
+export {
+  debounce,
+  filter,
+  map
+} from './events';
 
 
 // PRIMATIVES

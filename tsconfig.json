@@ -1,13 +1,12 @@
 {
   "compileOnSave": false,
   "compilerOptions": {
-    "target": "es2015",
+    "baseUrl": ".",
+    "target": "ES5",
     "module": "commonjs",
-    "rootDirs": [
-      "./src"
-    ],
+    "rootDir": ".",
     "outDir": "./dist",
-    "noUnusedLocals": true,
+    "noImplicitAny": true,
     "declaration": true
   },
   "files": [

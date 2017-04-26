@@ -1,0 +1,31 @@
+#!/usr/bin/env node
+const exec = require('child_process').exec;
+const packages = [
+  'dom'
+];
+
+console.log(__dirname);
+console.log(process.cwd());
+
+exec('rm -rf ./dist', function(code) {
+
+  console.log('exit: 1: ', code);
+
+  packages.forEach((package) => {
+    console.log('package: ' + package);
+    const cwd = './packages/' + package;
+    const buildCmd = '../../node_modules/.bin/tsc -p ./tsconfig.json;';
+    console.log('buildCmd: ' + buildCmd);
+    const child = exec(buildCmd, {
+      cwd: cwd
+    });
+
+    child.on('error', function(err) {
+      console.log('error: ', err);
+    });
+
+    child.on('exit', function(code, sig) {
+      console.log('exit: 2: ', code);
+    });
+  });
+});

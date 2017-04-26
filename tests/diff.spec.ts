@@ -2,7 +2,7 @@ import { diff } from '../src/diff';
 import * as Elements from '../src/elements';
 import * as Html from '../src/html';
 import * as Keyed from '../src/keyed';
-import { PatchType } from '../src/patches';
+import { PatchType, Patch } from '../src/patches';
 import { assert } from 'chai';
 
 
@@ -11,7 +11,7 @@ describe('diff', function() {
     const div1 = Html.div([], []);
     const div2 = Html.div([], []);
     const actual = diff(div1, div2);
-    const expected = [];
+    const expected: Array<Patch> = [];
 
     assert.deepEqual(actual, expected);
   });
@@ -20,7 +20,7 @@ describe('diff', function() {
     const div1 = Keyed.ul([], [ Keyed.li(1, [], []), Keyed.li(2, [], []) ]);
     const div2 = Keyed.ul([], [ Keyed.li(2, [], []), Keyed.li(1, [], []) ]);
     const actual = diff(div1, div2);
-    const expected = [ {
+    const expected: Array<Patch> = [ {
       type: PatchType.REORDER,
       data: {
         inserts: [],
@@ -46,7 +46,7 @@ describe('diff', function() {
     const div1 = Keyed.ul([], [ Keyed.li(1, [], []), Keyed.li(2, [], []) ]);
     const div2 = Keyed.ul([], [ Keyed.li(2, [], []) ]);
     const actual = diff(div1, div2);
-    const expected = [ {
+    const expected: Array<Patch> = [ {
       type: PatchType.REORDER,
       data: {
         inserts: [],
@@ -76,7 +76,7 @@ describe('diff', function() {
       Keyed.li(3, [], [])
     ]);
     const actual = diff(div1, div2);
-    const expected = [ {
+    const expected: Array<Patch> = [ {
       type: PatchType.REORDER,
       data: {
         inserts: [ {
@@ -103,7 +103,7 @@ describe('diff', function() {
       Keyed.li(2, [], [])
     ]);
     const actual = diff(div1, div2);
-    const expected = [ {
+    const expected: Array<Patch> = [ {
       type: PatchType.REORDER,
       data: {
         inserts: [ {

@@ -1,21 +1,22 @@
-import { AttrType } from './attributes/AttrType';
-import { ClassAttribute } from './attributes/classes';
-import { StyleAttribute } from './attributes/style';
-import { DataAttribute } from './attributes/data';
-import { PropertyType } from './attributes/props';
-import { AttributeType } from './attributes/attrs';
-import { EventAttribute } from './attributes/events';
-import * as PropertyStatic from './attributes/props';
+import { AttrType } from './AttrType';
+import { ClassAttribute } from './classes';
+import { StyleAttribute } from './style';
+import { DataAttribute } from './data';
+import { PropertyType } from './props';
+import { AttributeType } from './attrs';
+import { EventAttribute } from './events';
+import * as PropertyStatic from './props';
 
 
-export * from './attributes/attrs';
-export * from './attributes/AttrType';
-export * from './attributes/classes';
-export * from './attributes/style';
-export * from './attributes/data';
+export * from './attrs';
+export * from './AttrType';
+export * from './classes';
+export * from './style';
+export * from './data';
 export const Property = PropertyStatic;
-export { PropertyType } from './attributes/props';
-export { EventAttribute } from './attributes/events';
+export { AttrType } from './AttrType';
+export { PropertyType } from './props';
+export { EventAttribute } from './events';
 
 
 export type Attribute<T> =
@@ -61,7 +62,7 @@ export function organizeAttributes<T>(attrs: Array<Attribute<T>>): Attributes<T>
         break;
 
       case AttrType.EVENT:
-        processed['event-' + attr.value.name] = attr;
+        processed[`event-${attr.value.name}-${i}`] = attr;
         break;
     }
   }

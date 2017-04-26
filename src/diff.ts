@@ -124,7 +124,7 @@ function diffChildren<T>(oldParent: VNode<T>, newParent: VNode<T>, patches: Arra
 
 
 interface KeyMap {
-  [name: number]: number;
+  [name: string]: number;
 }
 
 

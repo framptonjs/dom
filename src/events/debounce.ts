@@ -1,15 +1,15 @@
 import { Html, NodeType, VKeyedChild, RootNode } from '../elements';
 import { AttrType, Attributes, Attribute } from '../attributes';
-import { EventDef, EventType, EventMessenger, EventPredicate, filterEvent } from '../attributes/events';
+import { EventDef, EventType, debounceEvent } from '../attributes/events';
 import { cachedNode } from '../cached-node';
 
 
-function filterAttr<T>(predicate: EventPredicate<T>, attr: Attribute<T>): Attribute<T> {
+function debounceAttr<T>(delay: number, attr: Attribute<T>): Attribute<T> {
   switch (attr.type) {
     case AttrType.EVENT:
       return {
         type: AttrType.EVENT,
-        value: filterEvent(predicate, attr.value)
+        value: debounceEvent(delay, attr.value)
       };
 
     default:
@@ -18,28 +18,28 @@ function filterAttr<T>(predicate: EventPredicate<T>, attr: Attribute<T>): Attrib
 }
 
 
-function filterAttrs<T>(predicate: EventPredicate<T>, attrs: Attributes<T>): Attributes<T> {
+function debounceAttrs<T>(delay: number, attrs: Attributes<T>): Attributes<T> {
   const newAttrs: Attributes<T> = {};
 
   for (let key in attrs) {
-    newAttrs[key] = filterAttr(predicate, attrs[key]);
+    newAttrs[key] = debounceAttr(delay, attrs[key]);
   }
 
   return newAttrs;
 }
 
 
-export const filter: <T>(predicate: EventPredicate<T>, node: Html<T>) => Html<T> =
-  cachedNode(function <T>(predicate: EventPredicate<T>, node: Html<T>): Html<T> {
+export const debounce: <T>(delay: number, node: Html<T>) => Html<T> =
+  cachedNode(function <T>(delay: number, node: Html<T>): Html<T> {
     switch (node.type) {
       case NodeType.NODE:
         return {
           type: NodeType.NODE,
           tag: node.tag,
-          attrs: filterAttrs(predicate, node.attrs),
+          attrs: debounceAttrs(delay, node.attrs),
           size: node.size,
           children: node.children.map((child: Html<T>): Html<T> => {
-            return filter(predicate, child);
+            return debounce(delay, child);
           }),
           domNode: node.domNode
         };
@@ -48,10 +48,10 @@ export const filter: <T>(predicate: EventPredicate<T>, node: Html<T>) => Html<T>
         return {
           type: NodeType.KEYED_NODE,
           tag: node.tag,
-          attrs: filterAttrs(predicate, node.attrs),
+          attrs: debounceAttrs(delay, node.attrs),
           size: node.size,
           children: node.children.map((child: VKeyedChild<T>): VKeyedChild<T> => {
-            return <VKeyedChild<T>>filter(predicate, child);
+            return <VKeyedChild<T>>debounce(delay, child);
           }),
           domNode: node.domNode
         };
@@ -60,7 +60,7 @@ export const filter: <T>(predicate: EventPredicate<T>, node: Html<T>) => Html<T>
         return {
           type: NodeType.KEYED_CHILD,
           key: node.key,
-          node: <RootNode<T>>filter(predicate, node.node)
+          node: <RootNode<T>>debounce(delay, node.node)
         };
 
       default:

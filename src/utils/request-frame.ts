@@ -1,4 +1,4 @@
-export default function(callback) {
+export default function(callback: () => void): void {
   if (typeof window.requestAnimationFrame === 'function') {
     window.requestAnimationFrame(callback);
   } else {

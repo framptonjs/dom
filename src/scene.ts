@@ -17,7 +17,7 @@ export interface Scheduler<T> {
 }
 
 
-export function scene<T>(rootNode: HTMLElement, initialView: RootNode<T>, messages: (evt: T) => void): Scheduler<T> {
+export function scene<T>(rootNode: Element, initialView: RootNode<T>, messages: (evt: T) => void): Scheduler<T> {
   const runtime: Runtime<T> = makeRuntime(messages);
   let savedDOM: RootNode<T> = initialView;
   let scheduledDOM: RootNode<T> = null;

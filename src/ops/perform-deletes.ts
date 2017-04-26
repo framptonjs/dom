@@ -21,7 +21,7 @@ function deleteNode<T>(node: Html<T>, runtime: Runtime<T>): void {
 }
 
 
-export function performDeletes<T>(deletes: Array<ReorderPatch<T>>, runtime: Runtime): void {
+export function performDeletes<T>(deletes: Array<ReorderPatch<T>>, runtime: Runtime<T>): void {
   const len = deletes.length;
   for (let i = 0; i < len; i++) {
     deleteNode(deletes[i].node, runtime);

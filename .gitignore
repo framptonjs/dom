@@ -4,5 +4,6 @@ tmp
 *.log
 src/*.js
 tests/*.js
+examples
 testing
 dist

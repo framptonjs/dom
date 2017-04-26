@@ -31,7 +31,7 @@ export function applyAttr<T>(element: HTMLElement, key: string, attr: Attribute<
       break;
 
     case AttrType.PROPERTY:
-      element[key] = attr.value;
+      (<any>element)[key] = attr.value;
       break;
 
     case AttrType.DATA:
@@ -47,7 +47,7 @@ export function applyAttr<T>(element: HTMLElement, key: string, attr: Attribute<
       break;
 
     case AttrType.EVENT:
-      applyEvent(element, attr, runtime);
+      applyEvent(element, key, attr, runtime);
       break;
 
     default:

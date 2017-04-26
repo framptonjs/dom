@@ -10,7 +10,6 @@ function emptyEvent<T>(template: EventAttribute<T>): EventAttribute<T> {
         value: {
           type: EventType.DOM,
           name: template.value.name,
-          bubbles: template.value.bubbles,
           handler: undefined
         }
       };
@@ -41,7 +40,6 @@ export function diffEvent<T>(oldEvent: EventAttribute<T>, newEvent: EventAttribu
           value: {
             type: EventType.DOM,
             name: newEvent.value.name,
-            bubbles: newEvent.value.bubbles,
             handler: newEvent.value.handler
           }
         };

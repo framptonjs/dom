@@ -1,108 +1,94 @@
-import { getDocumentEvent } from './get-document-event';
-import { InputNode, InputListener } from './input-node';
-import { DomEventDef } from '../attributes/events';
+import { Signal } from '@frampton/core';
+import { onEvent } from '@frampton/events';
+import { DomEventDef, EventMessenger } from '../attributes/events';
 
 
-interface EventHandler {
-  (evt: Event): void;
-}
-
-
-interface ElementEventMap {
-  [name: string]: EventDescription;
-}
-
-
-interface EventDescription {
-  name: string;
-  bubbles: boolean;
-  handler: EventHandler
-}
-
-
-function removeFromDocument(name: string, bubbles: boolean, handler: EventHandler): void {
-  const documentInput: InputNode<Event> =
-    getDocumentEvent(name, bubbles);
-
-  if (handler !== undefined) {
-    const listeners: Array<InputListener<Event>> =
-      documentInput.listeners;
-
-    const updatedListeners: Array<InputListener<Event>> =
-      [];
-
-    const len: number =
-      listeners.length;
-
-    for (let i = 0; i < len; i++) {
-      if (listeners[i] !== handler) {
-        updatedListeners.push(listeners[i]);
-      }
-    }
-
-    documentInput.listeners = updatedListeners;
+declare global {
+  interface Node {
+    __fr_event_handlers: ElementEventMap;
   }
 }
 
 
-export function removeEvent<T>(element: HTMLElement, event: DomEventDef<T>): void {
-  const name: string =
-    event.name;
+export interface ElementEventMap {
+  [name: string]: EventDescription;
+}
 
-  const handlers: ElementEventMap =
-    (<any>element).__fr_event_handlers;
 
-  if (handlers[name] !== undefined) {
+export interface EventDescription {
+  name: string;
+  signal: Signal<Event>;
+}
+
+
+function removeEventByName(node: Node, name: string): void {
+  const eventMap: ElementEventMap =
+    node.__fr_event_handlers;
+
+  if (eventMap !== undefined) {
     const eventDescription: EventDescription =
-      handlers[name];
+      eventMap[name];
 
-    const handler: EventHandler =
-      eventDescription.handler;
+    if (eventDescription !== undefined) {
+      const handler: Signal<Event> =
+        eventDescription.signal;
 
-    const bubbles: boolean =
-      eventDescription.bubbles;
+      handler.close();
 
-    removeFromDocument(name, bubbles, handler);
+      eventMap[name] = undefined;
+    }
   }
 }
 
 
 export function removeAllEvents(node: Node): void {
-  const handlers: ElementEventMap =
-    (<any>node).__fr_event_handlers;
+  const eventMap: ElementEventMap =
+    node.__fr_event_handlers;
 
-  if (handlers !== undefined) {
-    for (let key in handlers) {
-      const event: EventDescription =
-        handlers[key];
+  const childNodes: NodeList =
+    node.childNodes;
 
-      if (event !== undefined) {
-        removeFromDocument(event.name, event.bubbles, event.handler);
-      }
+  const len: number =
+    childNodes.length;
+
+  for (let i = 0; i < len; i++) {
+    removeAllEvents(childNodes[i]);
+  }
+
+  if (eventMap !== undefined) {
+    for (let key in eventMap) {
+      removeEventByName(node, key);
     }
   }
 }
 
 
-export function addEvent<T>(element: HTMLElement, event: DomEventDef<T>, callback: (evt: Event) => void): void {
-  if ((<any>element).__fr_event_handlers === undefined) {
-    (<any>element).__fr_event_handlers = {};
+export function removeEvent<T>(element: HTMLElement, name: string): void {
+  removeEventByName(element, name);
+}
+
+
+export function addEvent<T>(element: HTMLElement, name: string, event: DomEventDef<T>, callback: (evt: Event) => void): void {
+  if (element.__fr_event_handlers === undefined) {
+    element.__fr_event_handlers = {};
   }
 
-  const name: string =
+  const eventName: string =
     event.name;
 
-  const bubbles: boolean =
-    event.bubbles;
+  // Remove previous handlers for this event
+  removeEventByName(element, name);
 
-  const documentInput: InputNode<Event> =
-    getDocumentEvent(name, bubbles);
+  const parentSignal: Signal<Event> =
+    onEvent(eventName, element);
 
-  (<any>element).__fr_event_handlers[name] = {
-    name: name,
-    bubbles: bubbles,
-    handler: callback
+  const eventDescription: EventDescription = {
+    name: eventName,
+    signal: parentSignal
   };
 
-  documentInput.listeners.push(callback);
+  parentSignal.onNext(callback);
+
+  element.__fr_event_handlers[name] =
+    eventDescription;
 }

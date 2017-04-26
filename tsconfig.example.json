@@ -4,11 +4,11 @@
     "target": "ES5",
     "module": "commonjs",
     "rootDir": ".",
-    "outDir": "./testing",
+    "outDir": "./examples",
     "noImplicitAny": true,
     "noUnusedLocals": false
   },
   "files": [
-    "./tests/index.ts"
+    "./example.ts"
   ]
 }

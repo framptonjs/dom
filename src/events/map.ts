@@ -1,40 +1,7 @@
 import { Html, NodeType, VKeyedChild, RootNode } from '../elements';
 import { AttrType, Attributes, Attribute } from '../attributes';
-import { EventDef, EventType } from '../attributes/events';
+import { EventDef, EventType, EventMapping, mapEvent } from '../attributes/events';
 import { cachedNode } from '../cached-node';
-
-
-export interface EventMapping<A,B> {
-  (evt: A): B;
-}
-
-
-function mapEvent<A,B>(fn: EventMapping<A,B>, eventDef: EventDef<A>): EventDef<B> {
-  switch (eventDef.type) {
-    case EventType.LIFECYCLE:
-      return {
-        type: EventType.LIFECYCLE,
-        name: eventDef.name,
-        handler: function(element: HTMLElement, messages: (val: B) => void): void {
-          eventDef.handler(element, function(val: A): void {
-            messages(fn(val));
-          });
-        }
-      };
-
-    case EventType.DOM:
-      return {
-        type: EventType.DOM,
-        name: eventDef.name,
-        bubbles: eventDef.bubbles,
-        handler: function(evt: Event, messages: (val: B) => void): void {
-          eventDef.handler(evt, function(val: A): void {
-            messages(fn(val));
-          });
-        }
-      };
-  }
-}
 
 
 function mapAttr<A,B>(fn: EventMapping<A,B>, attr: Attribute<A>): Attribute<B> {
@@ -53,9 +20,11 @@ function mapAttr<A,B>(fn: EventMapping<A,B>, attr: Attribute<A>): Attribute<B> {
 
 function mapAttrs<A,B>(fn: EventMapping<A,B>, attrs: Attributes<A>): Attributes<B> {
   const newAttrs: Attributes<B> = {};
+
   for (let key in attrs) {
     newAttrs[key] = mapAttr(fn, attrs[key]);
   }
+
   return newAttrs;
 }
 

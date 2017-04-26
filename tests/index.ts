@@ -1,3 +1,4 @@
+import './app.spec';
 import './html.spec';
 import './diff.spec';
 

@@ -1,19 +1,12 @@
 import * as EventDispatcher from './events/dispatcher';
-import { InputNode } from './events/input-node';
-import { EventAttribute, EventType, DomEventDef, LifecycleEventDef } from './attributes/events';
+import { EventAttribute, EventType, DomEventDef, EventSink, LifecycleEventDef } from './attributes/events';
 
 
 export interface Runtime<T> {
-  addEvent(element: HTMLElement, eventDef: EventAttribute<T>): void;
-  removeEvent(element: HTMLElement, eventDef: EventAttribute<T>): void;
+  addEvent(element: HTMLElement, name: string, eventDef: EventAttribute<T>): void;
+  removeEvent(element: HTMLElement, name: string, eventDef: EventAttribute<T>): void;
   removeAllEvents(node: Node): void;
-  push(input: InputNode<T>, value: T): void;
   sceneRendered(): void;
-}
-
-
-interface EventSink {
-  (evt: Event): void;
 }
 
 
@@ -36,20 +29,10 @@ function contains(child: HTMLElement, parent: HTMLElement): boolean {
 }
 
 
-function nodeGate(element: HTMLElement, handler: EventSink): EventSink {
-  return function(evt: Event): void {
-    const target = <HTMLElement>evt.target;
-    if (target && contains(target, element)) {
-      handler(evt);
-    }
-  };
-}
-
-
 function makeHandler<T>(element: HTMLElement, event: DomEventDef<T>, messages: (evt: T) => void): EventSink {
-  return nodeGate(element, function (evt: Event): void {
+  return function eventHandler(evt: Event): void {
     event.handler(evt, messages);
-  });
+  };
 }
 
 
@@ -71,15 +54,16 @@ function removeAllEvents(node: Node): void {
 
 
 export function makeRuntime<T>(messages: (evt: T) => void): Runtime<T> {
-  const inputs = [];
   let lifecycleNodes: Array<LifecycleNode> = [];
 
   return {
-    addEvent(element: HTMLElement, event: EventAttribute<T>): void {
+    addEvent(element: HTMLElement, name: string, event: EventAttribute<T>): void {
       switch (event.value.type) {
         case EventType.DOM: {
-          const eventHandler: EventSink = makeHandler<T>(element, event.value, messages);
-          EventDispatcher.addEvent(element, event.value, eventHandler);
+          const eventHandler: EventSink =
+            makeHandler<T>(element, event.value, messages);
+
+          EventDispatcher.addEvent(element, name, event.value, eventHandler);
           break;
         }
 
@@ -91,13 +75,12 @@ export function makeRuntime<T>(messages: (evt: T) => void): Runtime<T> {
           break;
         }
       }
-
     },
 
-    removeEvent(element: HTMLElement, event: EventAttribute<T>): void {
+    removeEvent(element: HTMLElement, name: string, event: EventAttribute<T>): void {
       switch (event.value.type) {
         case EventType.DOM: {
-          EventDispatcher.removeEvent(element, event.value);
+          EventDispatcher.removeEvent(element, name);
           break;
         }
 
@@ -118,7 +101,6 @@ export function makeRuntime<T>(messages: (evt: T) => void): Runtime<T> {
           break;
         }
       }
-
     },
 
     removeAllEvents(node: Node): void {
@@ -133,10 +115,6 @@ export function makeRuntime<T>(messages: (evt: T) => void): Runtime<T> {
         node.handler(node.element);
         node = lifecycleNodes.pop();
       }
-    },
-
-    push<T>(input: InputNode<T>, value: T): void {
-      inputs.push(input);
     }
   };
 };
