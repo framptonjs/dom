@@ -37,7 +37,6 @@ export const debounce: <T>(delay: number, node: Html<T>) => Html<T> =
           type: NodeType.NODE,
           tag: node.tag,
           attrs: debounceAttrs(delay, node.attrs),
-          size: node.size,
           children: node.children.map((child: Html<T>): Html<T> => {
             return debounce(delay, child);
           }),
@@ -49,7 +48,6 @@ export const debounce: <T>(delay: number, node: Html<T>) => Html<T> =
           type: NodeType.KEYED_NODE,
           tag: node.tag,
           attrs: debounceAttrs(delay, node.attrs),
-          size: node.size,
           children: node.children.map((child: VKeyedChild<T>): VKeyedChild<T> => {
             return <VKeyedChild<T>>debounce(delay, child);
           }),

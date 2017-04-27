@@ -37,7 +37,6 @@ export const filter: <T>(predicate: EventPredicate<T>, node: Html<T>) => Html<T>
           type: NodeType.NODE,
           tag: node.tag,
           attrs: filterAttrs(predicate, node.attrs),
-          size: node.size,
           children: node.children.map((child: Html<T>): Html<T> => {
             return filter(predicate, child);
           }),
@@ -49,7 +48,6 @@ export const filter: <T>(predicate: EventPredicate<T>, node: Html<T>) => Html<T>
           type: NodeType.KEYED_NODE,
           tag: node.tag,
           attrs: filterAttrs(predicate, node.attrs),
-          size: node.size,
           children: node.children.map((child: VKeyedChild<T>): VKeyedChild<T> => {
             return <VKeyedChild<T>>filter(predicate, child);
           }),

@@ -36,7 +36,7 @@ export function className(val: string): ClassAttribute {
 }
 
 
-export function classList(val: ClassMap): ClassAttribute {
+export function classMap(val: ClassMap): ClassAttribute {
   return {
     type: AttrType.CLASS_LIST,
     value: val

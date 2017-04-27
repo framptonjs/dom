@@ -111,6 +111,65 @@ const myDom =
   ]);
 ```
 
+#### Attributes vs Properties
+
+There are two kinds of Attributes in frampton-dom, an Attribute and a Property. An Attribute is set via the Element.setAttribute method.
+
+```
+node.setAttribute('value', 'my value');
+```
+
+A Property is set via normal object property syntax.
+
+```
+node.value = 'my value';
+```
+
+There are a number of built-in methods for creating properties and attributes, there are also generic methods for creating Properties and Attributes with names that haven't been included.
+
+```
+import {
+  div,
+  Attrs,
+  Props
+} from '@frampton/dom';
+
+
+const myDom =
+  div([
+    Attrs.id('my-id'),
+    Attrs.className('my-class'),
+    Props.innerHTML('<div>Some unsafe HTML</div>'),
+    Attrs.attribute('custom-attribute', 'custom-value'),
+    Props.property('custom-property', 'custom-value')
+  ]);
+```
+
+#### classMap
+
+Most functions for creating Attributes/Properties follow nameing from standard DOM properties. There are a few custom functions to help with stateless renders. One of these is the Attrs.classMap function. It takes a hash of the form className -> boolean.
+
+```
+import {
+  div,
+  Attrs
+} from '@frampton/dom';
+
+
+const myDom =
+  div([
+    Attrs.id('my-id'),
+    Attrs.classMap({
+      'class-one': true,
+      'class-two': false,
+      'class-three': true
+    })
+  ]);
+```
+
+The class name will be applied if the boolean is true.
+
+
 #### Events
 
 Where having attributes be objects gets interesting is when you start applying transformers to them. This is especcially relevant when considering events.
@@ -165,6 +224,8 @@ const myDom =
 
 The other transformer we have is the ability to map events.
 
+Note: In the following example 'htmlFor' is used for the DOM attribute 'for' because 'for' is a reserved word in JavaScript.
+
 ```
 import {
   div,
@@ -179,7 +240,7 @@ import {
 
 cosnt {
   id,
-  for,
+  htmlFor,
   className
 } = Attrs;
 
@@ -187,7 +248,7 @@ cosnt {
 const initialDom =
   div([], [
     label([
-      for('my-input')
+      htmlFor('my-input')
     ], [
       text('Enter name:')
     ]),
@@ -269,14 +330,14 @@ import {
 } from '@frampton/events';
 
 
-const inputValue: Attribute<string> =
+const onInputValue: Attribute<string> =
   Events.onInput(eventValue);
 
 
 const myDom =
   input([
-    Events.map((val: string) => ({ type: 'UpdateCharCount', val: val.length }), inputValue),
-    Events.map((val: string) => ({ type: 'Validate', val: val }), Events.debounce(200, inputValue))
+    Events.map((val: string) => ({ type: 'UpdateCharCount', val: val.length }), onInputValue),
+    Events.map((val: string) => ({ type: 'Validate', val: val }), Events.debounce(200, onInputValue))
   ]);
 ```
 

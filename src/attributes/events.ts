@@ -382,6 +382,17 @@ export function onInput<T>(handler: EventHandler<T>): EventAttribute<T> {
 }
 
 
+export function onInputValue(handler: EventHandler<string>): EventAttribute<string> {
+  return custom('input', (evt: Event): string => {
+    if ((<HTMLInputElement>evt.target).value !== null) {
+      return (<HTMLInputElement>evt.target).value;
+    } else {
+      return '';
+    }
+  });
+}
+
+
 export function onKeyDown<T>(handler: EventHandler<T>): EventAttribute<T> {
   return custom('keydown', handler);
 }

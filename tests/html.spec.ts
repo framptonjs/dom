@@ -10,7 +10,6 @@ describe('Html', function() {
       const expected: VNode<void> = {
         type: NodeType.NODE,
         tag: 'div',
-        size: 0,
         attrs: {},
         children: [],
         domNode: undefined

@@ -75,6 +75,16 @@ export function value(value: string): AttributeType {
 }
 
 
+export function checked(value: 'true'|'false'): AttributeType {
+  return attribute('checked', value);
+}
+
+
+export function selected(value: 'true'|'false'): AttributeType {
+  return attribute('selected', value);
+}
+
+
 // Uses 'htmlFor' because 'for' is a reserved word.
 export function htmlFor(value: string): AttributeType {
   return attribute('for', value);

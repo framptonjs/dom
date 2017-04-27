@@ -8,11 +8,11 @@ import { AttrType } from './AttrType';
 export interface Property {
   type: AttrType.PROPERTY;
   name: string;
-  value: string;
+  value: string|boolean|number;
 }
 
 
-export function property(name: string, value: string): Property {
+export function property(name: string, value: string|boolean|number): Property {
   return {
     type: AttrType.PROPERTY,
     name: name,
@@ -31,6 +31,11 @@ export function value(val: string): Property {
 }
 
 
-export function checked(val: 'true' | 'false'): Property {
+export function checked(val: boolean): Property {
   return property('checked', val);
+}
+
+
+export function selected(val: boolean): Property {
+  return property('selected', val);
 }

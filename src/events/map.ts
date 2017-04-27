@@ -37,7 +37,6 @@ export const map: <A,B>(fn: EventMapping<A,B>, node: Html<A>) => Html<B> =
           type: NodeType.NODE,
           tag: node.tag,
           attrs: mapAttrs(fn, node.attrs),
-          size: node.size,
           children: node.children.map((child: Html<A>): Html<B> => {
             return map(fn, child);
           }),
@@ -49,7 +48,6 @@ export const map: <A,B>(fn: EventMapping<A,B>, node: Html<A>) => Html<B> =
           type: NodeType.KEYED_NODE,
           tag: node.tag,
           attrs: mapAttrs(fn, node.attrs),
-          size: node.size,
           children: node.children.map((child: VKeyedChild<A>): VKeyedChild<B> => {
             return <VKeyedChild<B>>map(fn, child);
           }),
