@@ -16,7 +16,7 @@ export const parent =
 
 // A child of keyed parent
 export const child =
-  <T>(key: NodeKey, tag: string, attrs: Array<Attribute<T>> = [], children: Array<RootNode<T>> = []): [ NodeKey, RootNode<T> ] =>
+  <T>(tag: string, key: NodeKey, attrs: Array<Attribute<T>> = [], children: Array<RootNode<T>> = []): [ NodeKey, RootNode<T> ] =>
     [ key, vNode(tag, attrs, children) ];
 
 
@@ -32,4 +32,4 @@ export const ul =
 
 export const li =
   <T>(key: NodeKey, attrs: Array<Attribute<T>> = [], children: Array<RootNode<T>> = []): [ NodeKey, RootNode<T> ] =>
-    child(key, 'li', attrs, children);
+    child('li', key, attrs, children);

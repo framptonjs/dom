@@ -5,14 +5,14 @@ import { AttrType } from './AttrType';
  * A Property is set as a property on a Node as in:
  * element.innerHTML = value;
  */
-export interface PropertyType {
+export interface Property {
   type: AttrType.PROPERTY;
   name: string;
   value: string;
 }
 
 
-export function property(name: string, value: string): PropertyType {
+export function property(name: string, value: string): Property {
   return {
     type: AttrType.PROPERTY,
     name: name,
@@ -21,11 +21,16 @@ export function property(name: string, value: string): PropertyType {
 }
 
 
-export function innerHTML(html: string): PropertyType {
+export function innerHTML(html: string): Property {
   return property('innerHTML', html);
 }
 
 
-export function value(val: string): PropertyType {
+export function value(val: string): Property {
   return property('value', val);
+}
+
+
+export function checked(val: 'true' | 'false'): Property {
+  return property('checked', val);
 }

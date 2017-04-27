@@ -15,9 +15,12 @@ export interface ClassAttribute {
 function organizeClasses(classes: string): ClassMap {
   const parts: Array<string> = classes.trim().split(' ');
   const classMap: ClassMap = {};
+  const len: number = parts.length;
 
-  for (let i = 0; i < parts.length; i++) {
-    const className = parts[i];
+  for (let i = 0; i < len; i++) {
+    const className: string =
+      parts[i];
+
     classMap[className] = true;
   }
 

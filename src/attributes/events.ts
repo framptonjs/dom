@@ -67,20 +67,6 @@ export interface EventAttribute<T> {
 }
 
 
-function makeEventMessenger<T>(fn: EventHandler<T>): EventMessenger<Event,T> {
-  return function(evt: Event, messages: (val: T) => void): void {
-    messages(fn(evt));
-  };
-}
-
-
-function makeLifecycleMessenger<T>(fn: LifecycleHandler<T>): EventMessenger<HTMLElement,T> {
-  return function(element: HTMLElement, messages: (val: T) => void): void {
-    messages(fn(element));
-  };
-}
-
-
 // EVENT TRANSFORMERS
 
 function mapHandler<A,B,C>(mapping: EventMapping<B,C>, handler: EventMessenger<A,B>): EventMessenger<A,C> {
@@ -261,6 +247,13 @@ export function dropRepeats<T>(event: EventAttribute<T>): EventAttribute<T> {
 
 
 // DOM EVENTS
+
+function makeEventMessenger<T>(fn: EventHandler<T>): EventMessenger<Event,T> {
+  return function(evt: Event, messages: (val: T) => void): void {
+    messages(fn(evt));
+  };
+}
+
 
 export function custom<T>(name: string, handler: EventHandler<T>): EventAttribute<T> {
   return {
@@ -521,6 +514,13 @@ export function onWheel<T>(handler: EventHandler<T>): EventAttribute<T> {
 
 // LIFECYCLE EVENTS
 
+function makeLifecycleMessenger<T>(fn: LifecycleHandler<T>): EventMessenger<HTMLElement,T> {
+  return function(element: HTMLElement, messages: (val: T) => void): void {
+    messages(fn(element));
+  };
+}
+
+
 export function onRender<T>(handler: LifecycleHandler<T>): EventAttribute<T> {
   return {
     type: AttrType.EVENT,
@@ -531,3 +531,15 @@ export function onRender<T>(handler: LifecycleHandler<T>): EventAttribute<T> {
     }
   };
 }
+
+
+// export function onRemove<T>(handler: LifecycleHandler<T>): EventAttribute<T> {
+//   return {
+//     type: AttrType.EVENT,
+//     value: {
+//       type: EventType.LIFECYCLE,
+//       name: 'remove',
+//       handler: makeLifecycleMessenger(handler)
+//     }
+//   };
+// }

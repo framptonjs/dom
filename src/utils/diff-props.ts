@@ -6,14 +6,14 @@ import {
   StyleAttribute,
   EventAttribute,
   AttributeType,
-  PropertyType
+  Property
 } from '../attributes';
 import { diffClasses } from './diff-classes';
 import { diffStyles } from './diff-styles';
 import { diffEvent } from './diff-event';
 
 
-function diffProperty(oldProp: PropertyType, newProp: PropertyType): PropertyType {
+function diffProperty(oldProp: Property, newProp: Property): Property {
   if (newProp === undefined) {
     return {
       type: AttrType.PROPERTY,
@@ -66,7 +66,7 @@ export function diffProps<T>(oldAttrs: Attributes<T>, newAttrs: Attributes<T>): 
       }
 
       case AttrType.PROPERTY: {
-        const propDiff = diffProperty(oldAttr, (<PropertyType>newAttr));
+        const propDiff = diffProperty(oldAttr, (<Property>newAttr));
         if (propDiff !== undefined) {
           diff = (diff || {});
           diff[key] = propDiff;

@@ -2,7 +2,7 @@ import { AttrType } from './AttrType';
 import { ClassAttribute } from './classes';
 import { StyleAttribute } from './style';
 import { DataAttribute } from './data';
-import { PropertyType } from './props';
+import { Property } from './props';
 import { AttributeType } from './attrs';
 import { EventAttribute } from './events';
 import * as PropertyStatic from './props';
@@ -13,15 +13,17 @@ export * from './AttrType';
 export * from './classes';
 export * from './style';
 export * from './data';
-export const Property = PropertyStatic;
-export { AttrType } from './AttrType';
-export { PropertyType } from './props';
+export { ClassAttribute } from './classes';
+export { StyleAttribute } from './style';
+export { DataAttribute } from './data';
+export { Property } from './props';
+export { AttributeType } from './attrs';
 export { EventAttribute } from './events';
 
 
 export type Attribute<T> =
   ClassAttribute |
-  PropertyType |
+  Property |
   StyleAttribute |
   DataAttribute |
   AttributeType |
