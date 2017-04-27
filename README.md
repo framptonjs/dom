@@ -43,7 +43,7 @@ const myDom =
 
 Almost every node constructing function takes two arguments: an array of attributes and an array of children. We'll just worry about the array of children for now.
 
-I say most node constructors take two arguments. Dom elements that allow children don't accept a second argument (img, input...).
+I say most node constructors take two arguments. Dom elements that don't allow children don't accept a second argument (img, br, input...).
 
 
 ### scene
