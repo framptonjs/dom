@@ -111,6 +111,8 @@ const myDom =
   ]);
 ```
 
+#### Events
+
 Where having attributes be objects gets interesting is when you start applying transformers to them. This is especcially relevant when considering events.
 
 In below example the value of the input field will be passed to the event handling function we gave to the scene constructor.
@@ -248,6 +250,34 @@ const scheduler: Scheduler =
       console.log('Greeting: ' + evt);
     }
   );
+```
+
+#### Multiple handlers
+
+Something else we can do is assign multiple handlers for the same event. Suppose we have an input. We perform validation on that input that requires a network request. We want to debounce that. We also display a character counter to the user. We obviously don't want to debounce that.
+
+```
+import {
+  input,
+  text,
+  Events,
+  Attribute
+} from '@frampton/dom';
+
+import {
+  eventValue
+} from '@frampton/events';
+
+
+const inputValue: Attribute<string> =
+  Events.onInput(eventValue);
+
+
+const myDom =
+  input([
+    Events.map((val: string) => ({ type: 'UpdateCharCount', val: val.length }), inputValue),
+    Events.map((val: string) => ({ type: 'Validate', val: val }), Events.debounce(200, inputValue))
+  ]);
 ```
 
 
