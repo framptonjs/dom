@@ -29,15 +29,12 @@ A virtual DOM library built on functional-reactive principles.
 There are obviously two main actions you'd want to perform, define a DOM and render a DOM.
 
 ```
-import {
-  div,
-  text
-} from '@frampton/dom';
+import { Html } from '@frampton/dom';
 
 
 const myDom =
-  div([], [
-    text('Hello world')
+  Html.div([], [
+    Html.text('Hello world')
   ]);
 ```
 
@@ -52,16 +49,15 @@ The primary way to render your DOM is to create a scene.
 
 ```
 import {
-  div,
-  text,
+  Html,
   scene,
   Scheduler
 } from '@frampton/dom';
 
 
 const myDom =
-  div([], [
-    text('Hello world')
+  Html.div([], [
+    Html.text('Hello world')
   ]);
 
 
@@ -90,8 +86,7 @@ Attributes in Frampton-DOM are objects.
 
 ```
 import {
-  div,
-  text,
+  Html,
   Attrs
 } from '@frampton/dom';
 
@@ -103,11 +98,11 @@ cosnt {
 
 
 const myDom =
-  div([
+  Html.div([
     id('my-id'),
     className('my-class')
   ], [
-    text('Hello world')
+    Html.text('Hello world')
   ]);
 ```
 
@@ -129,14 +124,14 @@ There are a number of built-in methods for creating properties and attributes, t
 
 ```
 import {
-  div,
+  Html,
   Attrs,
   Props
 } from '@frampton/dom';
 
 
 const myDom =
-  div([
+  Html.div([
     Attrs.id('my-id'),
     Attrs.className('my-class'),
     Props.innerHTML('<div>Some unsafe HTML</div>'),
@@ -151,13 +146,13 @@ Most functions for creating Attributes/Properties follow nameing from standard D
 
 ```
 import {
-  div,
+  Html,
   Attrs
 } from '@frampton/dom';
 
 
 const myDom =
-  div([
+  Html.div([
     Attrs.id('my-id'),
     Attrs.classMap({
       'class-one': true,
@@ -178,14 +173,13 @@ In below example the value of the input field will be passed to the event handli
 
 ```
 import {
-  input,
-  text,
+  Html,
   Events
 } from '@frampton/dom';
 
 
 const myDom =
-  input([
+  Html.input([
     Events.onInput((evt: Event) => evt.target.value)
   ]);
 ```
@@ -194,14 +188,13 @@ What if we wanted to debounce input events?
 
 ```
 import {
-  input,
-  text,
+  Html,
   Events
 } from '@frampton/dom';
 
 
 const myDom =
-  input([
+  Html.input([
     Events.debounce(200, Events.onInput((evt: Event) => evt.target.value))
   ]);
 ```
@@ -210,14 +203,13 @@ What if we also only wanted values over 5 characters long?
 
 ```
 import {
-  input,
-  text,
+  Html,
   Events
 } from '@frampton/dom';
 
 
 const myDom =
-  input([
+  Html.input([
     Events.filter((val) => val.length >= 5, Events.debounce(200, Events.onInput((evt: Event) => evt.target.value)))
   ]);
 ```
@@ -228,10 +220,7 @@ Note: In the following example 'htmlFor' is used for the DOM attribute 'for' bec
 
 ```
 import {
-  div,
-  label,
-  input,
-  text,
+  Html,
   Attrs,
   Events,
   scene
@@ -246,13 +235,13 @@ cosnt {
 
 
 const initialDom =
-  div([], [
-    label([
+  Html.div([], [
+    Html.label([
       htmlFor('my-input')
     ], [
-      text('Enter name:')
+      Html.text('Enter name:')
     ]),
-    input([
+    Html.input([
       Events.map((name) => `Hello, ${name}`, Events.debounce(200, Events.onInput((evt: Event) => evt.target.value)))
     ])
   ]);
@@ -272,11 +261,7 @@ All three event transformers can be applied at the node level as well, applying 
 
 ```
 import {
-  div,
-  label,
-  input,
-  text,
-  map,
+  Html,
   Attrs,
   Events,
   scene
@@ -291,13 +276,13 @@ cosnt {
 
 
 const initialDom =
-  map((name) => `Hello, ${name}`, div([], [
+  Html.map((name) => `Hello, ${name}`, Html.div([], [
     label([
       for('my-input')
     ], [
-      text('Enter name:')
+      Html.text('Enter name:')
     ]),
-    input([
+    Html.input([
       Events.debounce(200, Events.onInput((evt: Event) => evt.target.value))
     ])
   ]));
@@ -319,8 +304,7 @@ Something else we can do is assign multiple handlers for the same event. Suppose
 
 ```
 import {
-  input,
-  text,
+  Html,
   Events,
   Attribute
 } from '@frampton/dom';
@@ -335,7 +319,7 @@ const onInputValue: Attribute<string> =
 
 
 const myDom =
-  input([
+  Html.input([
     Events.map((val: string) => ({ type: 'UpdateCharCount', val: val.length }), onInputValue),
     Events.map((val: string) => ({ type: 'Validate', val: val }), Events.debounce(200, onInputValue))
   ]);
@@ -348,18 +332,9 @@ Sometimes you will want to reorder nodes. In order to reorder nodes you need to 
 
 ```
 import {
-  text,
+  Html,
   Keyed
 } from '@frampton/dom';
-
-
-const {
-  parent,
-  child,
-  ul,
-  ol,
-  li
-} = Keyed;
 ```
 
 The assumption is that most of the time when reordering nodes you are going to be working with lists.
@@ -368,10 +343,10 @@ The assumption is that most of the time when reordering nodes you are going to b
 const initialDom =
   Keyed.ul([], [
     Keyed.li(1, [], [
-      text('first list item')
+      Html.text('first list item')
     ]),
     Keyed.li(2, [], [
-      text('second list item')
+      Html.text('second list item')
     ])
   ]);
 ```
@@ -384,10 +359,10 @@ Later we could apply this new DOM.
 const updatedDom =
   Keyed.ul([], [
     Keyed.li(2, [], [
-      text('second list item')
+      Html.text('second list item')
     ]),
     Keyed.li(1, [], [
-      text('first list item')
+      Html.text('first list item')
     ])
   ]);
 ```
@@ -398,24 +373,18 @@ If you want to reorder nodes that aren't list items you can use the generic Keye
 
 ```
 import {
-  text,
+  Html,
   Keyed
 } from '@frampton/dom';
 
 
-const {
-  parent,
-  child
-} = Keyed;
-
-
 const initialDom =
-  parent('div', [], [
-    child('div', 1, [], [
-      text('first child div')
+  Keyed.parent('div', [], [
+    Keyed.child('div', 1, [], [
+      Html.text('first child div')
     ]),
-    child('div', 2, [], [
-      text('second child div')
+    Keyed.child('div', 2, [], [
+      Html.text('second child div')
     ])
   ]);
 ```
@@ -441,11 +410,11 @@ So then when we map nodes we change the type of those nodes.
 
 ```
 const firstInput: Html<Event> =
-  input([
+  Html.input([
     onInput((evt: Event) => evt)
   ]);
 
 
 const secondInput: Html<string> =
-  map((evt: Event): string => evt.target.value, firstInput);
+  Html.map((evt: Event): string => evt.target.value, firstInput);
 ```

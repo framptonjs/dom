@@ -15,6 +15,9 @@ describe('Html', function() {
         domNode: undefined
       };
 
+      console.log('actual: ', JSON.stringify(actual, null, 2));
+      console.log('expected: ', JSON.stringify(expected, null, 2));
+
       assert.deepEqual(actual, expected);
     });
   });

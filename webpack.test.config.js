@@ -13,5 +13,15 @@ module.exports = {
 
   resolve: {
     extensions: [ '.js' ]
+  },
+
+  module: {
+    loaders: [
+      {
+        test: /\.js?/,
+        exclude: /node_modules\/(?!@frampton)/,
+        loader: "babel-loader"
+      }
+    ]
   }
 };

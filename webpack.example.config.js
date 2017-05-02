@@ -16,6 +16,16 @@ module.exports = {
     extensions: [ '.js' ]
   },
 
+  module: {
+    loaders: [
+      {
+        test: /\.js?/,
+        exclude: /node_modules\/(?!@frampton)/,
+        loader: "babel-loader"
+      }
+    ]
+  },
+
   // Source maps support ('inline-source-map' also works)
   devtool: 'source-map'
 };

@@ -1,35 +1,44 @@
-const { resolve } = require('path');
+const { resolve } = require("path");
 
 module.exports = {
 
   entry: {
-    'dom': './dist/index.js'
+    "dom": "./dist/index.js"
   },
 
   output: {
-    filename: '[name].js',
-    path: resolve('dist/bundles'),
-    library: '@frampton/dom',
-    libraryTarget: 'commonjs2'
+    filename: "[name].js",
+    path: resolve("dist/bundles"),
+    library: "@frampton/dom",
+    libraryTarget: "commonjs2"
   },
 
-  // Currently we need to add '.ts' to the resolve.extensions array.
   resolve: {
-    extensions: [ '.js' ]
+    extensions: [ ".js" ]
+  },
+
+  module: {
+    loaders: [
+      {
+        test: /\.js?/,
+        exclude: /node_modules\/(?!@frampton)/,
+        loader: "babel-loader"
+      }
+    ]
   },
 
   externals : {
-    '@frampton/core': {
+    "@frampton/core": {
       commonjs2: "@frampton/core"
     },
-    '@frampton/style': {
+    "@frampton/style": {
       commonjs2: "@frampton/style"
     },
-    '@frampton/events': {
+    "@frampton/events": {
       commonjs2: "@frampton/events"
     }
   },
 
-  // Source maps support ('inline-source-map' also works)
-  devtool: 'source-map'
+  // Source maps support ("inline-source-map" also works)
+  devtool: "source-map"
 };

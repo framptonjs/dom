@@ -2,15 +2,19 @@ module.exports = function(config) {
   config.set({
     frameworks: [ 'mocha' ],
 
-    browsers: [ 'PhantomJS' ],
+    browsers: [
+      'Chrome'
+    ],
 
-    files: [ './testing/bundles/dom.spec.js' ],
+    files: [
+      './testing/bundles/dom.spec.js'
+    ],
 
     singleRun: true,
 
     plugins: [
       'karma-mocha',
-      'karma-phantomjs-launcher'
+      'karma-chrome-launcher'
     ],
 
     //logLevel: config.LOG_DEBUG,
