@@ -3,7 +3,7 @@ module.exports = function(config) {
     frameworks: [ 'mocha' ],
 
     browsers: [
-      'Chrome'
+      'PhantomJS'
     ],
 
     files: [
@@ -14,7 +14,7 @@ module.exports = function(config) {
 
     plugins: [
       'karma-mocha',
-      'karma-chrome-launcher'
+      'karma-phantomjs-launcher'
     ],
 
     //logLevel: config.LOG_DEBUG,
