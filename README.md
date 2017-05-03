@@ -184,6 +184,8 @@ const myDom =
   ]);
 ```
 
+##### Debounce Events
+
 What if we wanted to debounce input events?
 
 ```
@@ -199,6 +201,8 @@ const myDom =
   ]);
 ```
 
+##### Filter Events
+
 What if we also only wanted values over 5 characters long?
 
 ```
@@ -213,6 +217,8 @@ const myDom =
     Events.filter((val) => val.length >= 5, Events.debounce(200, Events.onInput((evt: Event) => evt.target.value)))
   ]);
 ```
+
+##### Map Events
 
 The other transformer we have is the ability to map events.
 
@@ -257,7 +263,9 @@ const scheduler: Scheduler =
   );
 ```
 
-All three event transformers can be applied at the node level as well, applying to all events contained within a node, children inclusive. The node-level transformers are exported from the top level of frampton-dom, along with the node constructors.
+##### Transform Nodes
+
+All three event transformers can be applied at the node level as well, applying to all events contained within a node, children inclusive. The node-level transformers are exported with the node constructors in Html.
 
 ```
 import {
@@ -270,7 +278,7 @@ import {
 
 cosnt {
   id,
-  for,
+  htmlFor,
   className
 } = Attrs;
 
@@ -278,7 +286,7 @@ cosnt {
 const initialDom =
   Html.map((name) => `Hello, ${name}`, Html.div([], [
     label([
-      for('my-input')
+      htmlFor('my-input')
     ], [
       Html.text('Enter name:')
     ]),
