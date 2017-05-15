@@ -20,7 +20,7 @@ import {
 import { diffProps } from './utils/diff-props';
 
 
-export function diff<T>(oldNode: RootNode<T>, newNode: RootNode<T>): Array<Patch> {
+export function diff<T>(oldNode: Html<T>, newNode: Html<T>): Array<Patch> {
   const patches: Array<Patch> = [];
   runDiff(oldNode, newNode, patches);
   return patches;

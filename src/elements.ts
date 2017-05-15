@@ -77,7 +77,7 @@ export function vKeyedNode<T>(tag: string, attrs: Array<Attribute<T>> = [], chil
 
   for (let i = 0; i < len; i++) {
     const [ key, child ] = children[i];
-    const processedChild = vKeyedChild(key, child);
+    const processedChild: VKeyedChild<T> = vKeyedChild(key, child);
     processedChildren.push(processedChild);
   }
 
@@ -101,8 +101,6 @@ export function vKeyedChild<T>(key: NodeKey, node: RootNode<T>): VKeyedChild<T> 
 
 
 export function vNode<T>(tag: string, attrs: Array<Attribute<T>> = [], children: Array<Html<T>> = []): VNode<T> {
-  const len = children.length;
-
   return {
     type: NodeType.NODE,
     tag: tag,

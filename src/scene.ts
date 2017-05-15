@@ -1,4 +1,4 @@
-import { RootNode } from './elements';
+import { Html } from './elements';
 import requestFrame from './utils/request-frame';
 import { render } from './ops/render';
 import { diff } from './diff';
@@ -13,15 +13,27 @@ const enum RenderState {
 
 
 export interface Scheduler<T> {
-  (dom: RootNode<T>): void;
+  (dom: Html<T>): void;
 }
 
 
-export function scene<T>(rootNode: Element, initialView: RootNode<T>, messages: (evt: T) => void): Scheduler<T> {
-  const runtime: Runtime<T> = makeRuntime(messages);
-  let savedDOM: RootNode<T> = initialView;
-  let scheduledDOM: RootNode<T> = null;
-  let state: RenderState = RenderState.NOTHING;
+export interface MessageSink<T> {
+  (evt: T): void;
+}
+
+
+export function scene<T>(rootNode: Element, initialView: Html<T>, messages: MessageSink<T>): Scheduler<T> {
+  const runtime: Runtime<T> =
+    makeRuntime(messages);
+
+  let savedDOM: Html<T> =
+    initialView;
+
+  let scheduledDOM: Html<T> =
+    null;
+
+  let state: RenderState =
+    RenderState.NOTHING;
 
   rootNode.appendChild(render(savedDOM, runtime));
   runtime.sceneRendered();
@@ -35,7 +47,7 @@ export function scene<T>(rootNode: Element, initialView: RootNode<T>, messages: 
     state = RenderState.NOTHING;
   }
 
-  return function scheduler(dom: RootNode<T>): void {
+  return function scheduler(dom: Html<T>): void {
     scheduledDOM = dom;
 
     switch (state) {

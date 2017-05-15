@@ -12,11 +12,13 @@ A virtual DOM library built on functional-reactive principles.
 > npm install --save @frampton/dom
 ```
 
+
 ## Test
 
 ```
 > npm test
 ```
+
 
 ## Build
 
@@ -24,17 +26,18 @@ A virtual DOM library built on functional-reactive principles.
 > npm build
 ```
 
+
 ## Usage
 
 There are obviously two main actions you'd want to perform, define a DOM and render a DOM.
 
 ```
-import { Html } from '@frampton/dom';
+import { div, text, Html } from '@frampton/dom';
 
 
-const myDom =
-  Html.div([], [
-    Html.text('Hello world')
+const myDom: Html<void> =
+  div([], [
+    text('Hello world')
   ]);
 ```
 
@@ -49,15 +52,19 @@ The primary way to render your DOM is to create a scene.
 
 ```
 import {
+  Elements,
   Html,
   scene,
   Scheduler
 } from '@frampton/dom';
 
 
-const myDom =
-  Html.div([], [
-    Html.text('Hello world')
+const { div, text } = Elements;
+
+
+const myDom: Html<void> =
+  div([], [
+    text('Hello world')
   ]);
 
 
@@ -75,9 +82,10 @@ The scene function takes three arguments: a root element to render our virtual D
 
 The scene function returns a Scheduler that is used to schedule future updates to the DOM. The scheduler runs on requestAnimationFrame. The scheduler function takes one argument, the new DOM to update to.
 
+
 #### Just render
 
-The underlying render method is publicly exported, but it is not advised to use this method. It takes your virtual DOM and an istance of the Frampton-DOM Runtime. If you want to just render without the event handling, pass a no-op as the final argument to the scene function.
+The underlying render method is publicly exported, but it is not advised to use this method. It takes your virtual DOM and an instance of the Frampton-DOM Runtime. If you want to just render without the event handling, pass a no-op as the final argument to the scene function.
 
 
 ### Attributes and events
@@ -86,6 +94,7 @@ Attributes in Frampton-DOM are objects.
 
 ```
 import {
+  Elements,
   Html,
   Attrs
 } from '@frampton/dom';
@@ -97,14 +106,18 @@ cosnt {
 } = Attrs;
 
 
-const myDom =
-  Html.div([
+const { div, text } = Elements;
+
+
+const myDom: Html<void> =
+  div([
     id('my-id'),
     className('my-class')
   ], [
-    Html.text('Hello world')
+    text('Hello world')
   ]);
 ```
+
 
 #### Attributes vs Properties
 
@@ -124,14 +137,18 @@ There are a number of built-in methods for creating properties and attributes, t
 
 ```
 import {
+  Elements,
   Html,
   Attrs,
   Props
 } from '@frampton/dom';
 
 
-const myDom =
-  Html.div([
+const { div } = Elements;
+
+
+const myDom: Html<void> =
+  div([
     Attrs.id('my-id'),
     Attrs.className('my-class'),
     Props.innerHTML('<div>Some unsafe HTML</div>'),
@@ -140,19 +157,24 @@ const myDom =
   ]);
 ```
 
+
 #### classMap
 
-Most functions for creating Attributes/Properties follow nameing from standard DOM properties. There are a few custom functions to help with stateless renders. One of these is the Attrs.classMap function. It takes a hash of the form className -> boolean.
+Most functions for creating Attributes/Properties follow naming from standard DOM properties. There are a few custom functions to help with stateless renders. One of these is the Attrs.classMap function. It takes a hash of the form className -> boolean.
 
 ```
 import {
+  Elements,
   Html,
   Attrs
 } from '@frampton/dom';
 
 
-const myDom =
-  Html.div([
+const { div } = Elements;
+
+
+const myDom: Html<void> =
+  div([
     Attrs.id('my-id'),
     Attrs.classMap({
       'class-one': true,
@@ -167,39 +189,87 @@ The class name will be applied if the boolean is true.
 
 #### Events
 
-Where having attributes be objects gets interesting is when you start applying transformers to them. This is especcially relevant when considering events.
+Where having attributes be objects gets interesting is when you start applying transformers to them. This is especially relevant when considering events.
 
-In below example the value of the input field will be passed to the event handling function we gave to the scene constructor.
+Typically event handlers have the type of Event -> void.
+
+```
+node.addEventListener('click', (evt: Event): void {
+  // Do stuff with event
+});
+```
+
+In frampton event handlers return a value.
+
+In the below example the value of the input field will be passed to the event handling function we gave to the scene constructor.
 
 ```
 import {
+  Elements,
   Html,
   Events
 } from '@frampton/dom';
 
 
-const myDom =
-  Html.input([
+const { input } = Elements;
+
+
+const myDom: Html<string> =
+  input([
     Events.onInput((evt: Event) => evt.target.value)
   ]);
 ```
+
+
+##### Lifecycle
+
+Frampton-DOM currently has only one lifecycle hook, the onRender event handler. The onRender event handler is called after a node is rendered and added to the DOM. It will not be called before the node is available in the DOM.
+
+Most event handling functions receive the event object as their argument. The onRender event handler receives the rendered DOM node as its argument.
+
+It is exported with all of the other event handlers.
+
+```
+import {
+  Elements,
+  Html,
+  Events
+} from '@frampton/dom';
+
+
+const { div } = Elements;
+
+
+const myDom: Html<string> =
+  div([
+    Events.onRender((evt: HTMLElement): string => 'DIV rendered')
+  ]);
+```
+
 
 ##### Debounce Events
 
 What if we wanted to debounce input events?
 
+This will debounce events for 200 milliseconds.
+
 ```
 import {
+  Elements,
   Html,
   Events
 } from '@frampton/dom';
 
 
-const myDom =
-  Html.input([
+const { input } = Elements;
+
+
+const myDom: Html<string> =
+  input([
     Events.debounce(200, Events.onInput((evt: Event) => evt.target.value))
   ]);
 ```
+
 
 ##### Filter Events
 
@@ -207,16 +277,24 @@ What if we also only wanted values over 5 characters long?
 
 ```
 import {
+  Elements,
   Html,
   Events
 } from '@frampton/dom';
 
 
-const myDom =
-  Html.input([
-    Events.filter((val) => val.length >= 5, Events.debounce(200, Events.onInput((evt: Event) => evt.target.value)))
+const { input } = Elements;
+
+
+const myDom: Html<string> =
+  input([
+    Events.filter(
+      (val: string): boolean => val.length >= 5,
+      Events.debounce(200, Events.onInput((evt: Event) => evt.target.value))
+    )
   ]);
 ```
+
 
 ##### Map Events
 
@@ -226,6 +304,7 @@ Note: In the following example 'htmlFor' is used for the DOM attribute 'for' bec
 
 ```
 import {
+  Elements,
   Html,
   Attrs,
   Events,
@@ -240,14 +319,22 @@ cosnt {
 } = Attrs;
 
 
-const initialDom =
-  Html.div([], [
-    Html.label([
+const {
+  div,
+  label,
+  input,
+  text
+} = Elements;
+
+
+const initialDom: Html<string> =
+  div([], [
+    label([
       htmlFor('my-input')
     ], [
-      Html.text('Enter name:')
+      text('Enter name:')
     ]),
-    Html.input([
+    input([
       Events.map((name) => `Hello, ${name}`, Events.debounce(200, Events.onInput((evt: Event) => evt.target.value)))
     ])
   ]);
@@ -263,12 +350,14 @@ const scheduler: Scheduler =
   );
 ```
 
+
 ##### Transform Nodes
 
-All three event transformers can be applied at the node level as well, applying to all events contained within a node, children inclusive. The node-level transformers are exported with the node constructors in Html.
+All three event transformers can be applied at the node level as well, applying to all events contained within a node, children inclusive. The node-level transformers are exported with the node constructors in the Elements namespace.
 
 ```
 import {
+  Elements
   Html,
   Attrs,
   Events,
@@ -276,21 +365,30 @@ import {
 } from '@frampton/dom';
 
 
-cosnt {
+const {
   id,
   htmlFor,
   className
 } = Attrs;
 
 
-const initialDom =
-  Html.map((name) => `Hello, ${name}`, Html.div([], [
+const {
+  map,
+  div,
+  label,
+  text,
+  input
+} = Elements;
+
+
+const initialDom: Html<string> =
+  map((name: string): string => `Hello, ${name}`, div([], [
     label([
       htmlFor('my-input')
     ], [
-      Html.text('Enter name:')
+      text('Enter name:')
     ]),
-    Html.input([
+    input([
       Events.debounce(200, Events.onInput((evt: Event) => evt.target.value))
     ])
   ]));
@@ -306,12 +404,14 @@ const scheduler: Scheduler =
   );
 ```
 
+
 #### Multiple handlers
 
 Something else we can do is assign multiple handlers for the same event. Suppose we have an input. We perform validation on that input that requires a network request. We want to debounce that. We also display a character counter to the user. We obviously don't want to debounce that.
 
 ```
 import {
+  Elements,
   Html,
   Events,
   Attribute
@@ -322,12 +422,14 @@ import {
 } from '@frampton/events';
 
 
+const { input } = Elements;
+
 const onInputValue: Attribute<string> =
   Events.onInput(eventValue);
 
 
-const myDom =
-  Html.input([
+const myDom: Html<string> =
+  input([
     Events.map((val: string) => ({ type: 'UpdateCharCount', val: val.length }), onInputValue),
     Events.map((val: string) => ({ type: 'Validate', val: val }), Events.debounce(200, onInputValue))
   ]);
@@ -340,21 +442,24 @@ Sometimes you will want to reorder nodes. In order to reorder nodes you need to 
 
 ```
 import {
+  Elements,
   Html,
   Keyed
 } from '@frampton/dom';
+
+const { text } = Elements;
 ```
 
 The assumption is that most of the time when reordering nodes you are going to be working with lists.
 
 ```
-const initialDom =
+const initialDom: Html<void> =
   Keyed.ul([], [
     Keyed.li(1, [], [
-      Html.text('first list item')
+      text('first list item')
     ]),
     Keyed.li(2, [], [
-      Html.text('second list item')
+      text('second list item')
     ])
   ]);
 ```
@@ -364,13 +469,13 @@ A keyed parent, such as the ul and ol exported by Keyed, must only contain keyed
 Later we could apply this new DOM.
 
 ```
-const updatedDom =
+const updatedDom: Html<void> =
   Keyed.ul([], [
     Keyed.li(2, [], [
-      Html.text('second list item')
+      text('second list item')
     ]),
     Keyed.li(1, [], [
-      Html.text('first list item')
+      text('first list item')
     ])
   ]);
 ```
@@ -381,22 +486,24 @@ If you want to reorder nodes that aren't list items you can use the generic Keye
 
 ```
 import {
+  Elements,
   Html,
   Keyed
 } from '@frampton/dom';
 
 
-const initialDom =
+const { text } = Elements;
+
+const initialDom: Html<void> =
   Keyed.parent('div', [], [
     Keyed.child('div', 1, [], [
-      Html.text('first child div')
+      text('first child div')
     ]),
     Keyed.child('div', 2, [], [
-      Html.text('second child div')
+      text('second child div')
     ])
   ]);
 ```
-
 
 
 ### Type safe
@@ -418,11 +525,11 @@ So then when we map nodes we change the type of those nodes.
 
 ```
 const firstInput: Html<Event> =
-  Html.input([
+  input([
     onInput((evt: Event) => evt)
   ]);
 
 
 const secondInput: Html<string> =
-  Html.map((evt: Event): string => evt.target.value, firstInput);
+  map((evt: Event): string => evt.target.value, firstInput);
 ```

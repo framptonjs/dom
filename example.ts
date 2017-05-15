@@ -1,4 +1,7 @@
-import { Html, Attributes, scene, Events, RootNode } from './index';
+import {
+  div, input, button, text,
+  Html, Attributes, scene, Events, RootNode
+} from './index';
 import { eventValue } from '@frampton/events';
 
 
@@ -19,17 +22,17 @@ const mapping =
 
 
 const initialView =
-  Html.div(
+  div(
     [],
-    [ Html.input(
+    [ input(
         [ Events.onInput(eventValue)
         ]
       ),
-      Html.button(
+      button(
         [ Events.map(mapping, Events.onClick(clickHandler)),
           Events.onClick(click2Handler)
         ],
-        [ Html.text('Click me')
+        [ text('Click me')
         ]
       )
     ]);
@@ -43,23 +46,23 @@ const scheduler =
 
 function showOne() {
   const nextView =
-    Html.div(
+    div(
     [],
-    [ Html.input(
+    [ input(
         [ Events.onInput((evt: Event): string => 'word')
-        , Events.debounce(1000, Events.onInput((evt: Event): string => `Hello: ${evt.target.value}`))
+        , Events.debounce(1000, Events.onInput((evt: any): string => `Hello: ${evt.target.value}`))
         ]
       )
-    , Html.button(
+    , button(
         [ Events.map(mapping, Events.onClick(clickHandler)),
           Events.onClick(click2Handler)
         ],
-        [ Html.text('Click me')
+        [ text('Click me')
         ]
       )
-    , Html.div(
+    , div(
         [],
-        [ Html.text('Some text')
+        [ text('Some text')
         ]
       )
     ]);
@@ -71,17 +74,17 @@ function showOne() {
 
 function showTwo() {
   const nextView =
-    Html.div(
+    div(
     [],
-    [ Html.input(
-        [ Events.debounce(1000, Events.onInput((evt: Event): string => `Hello: ${evt.target.value}`))
+    [ input(
+        [ Events.debounce(1000, Events.onInput((evt: any): string => `Hello: ${evt.target.value}`))
         ]
       ),
-      Html.button(
+      button(
         [ Events.map(mapping, Events.onClick(clickHandler)),
           Events.onClick(click2Handler)
         ],
-        [ Html.text('Click me')
+        [ text('Click me')
         ]
       )
     ]);

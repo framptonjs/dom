@@ -1,8 +1,10 @@
 import { Signal, Task, Effect } from '@frampton/core';
-import { app } from '../src/app';
-import { div, text } from '../src/html';
-import { onClick } from '../src/attributes/events';
+import { app, Events, Html, Elements } from '../index';
 import { assert } from 'chai';
+
+
+const { div, text } = Elements;
+const { onClick } = Events;
 
 
 interface MockState {
@@ -52,7 +54,9 @@ describe('app', function() {
       switch(msg) {
         case 'first':
           count ++;
-          const newState = initState(state.count + 1);
+          const newState: MockState =
+            initState(state.count + 1);
+
           return [ newState, Task.never() ];
 
         default:
@@ -60,7 +64,7 @@ describe('app', function() {
       }
     }
 
-    function view(state: MockState) {
+    function view(state: MockState): Html<string> {
       assert.equal(state.count, count);
       if (state.count > 0) { done(); }
 

@@ -6,7 +6,7 @@ import { assert } from 'chai';
 describe('Html', function() {
   describe('div', function() {
     it('should create empty div', function() {
-      const actual = Html.div([], []);
+      const actual: Html.Html<any> = Html.div([], []);
       const expected: VNode<void> = {
         type: NodeType.NODE,
         tag: 'div',

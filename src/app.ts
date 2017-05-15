@@ -1,6 +1,7 @@
 import { Signal, Effect, Task } from '@frampton/core';
-import { RootNode } from './elements';
+import { Html } from './elements';
 import { scene, Scheduler } from './scene';
+
 
 export type StateAndEffect<S,M> =
   [ S, Effect<M> ];
@@ -8,7 +9,7 @@ export type StateAndEffect<S,M> =
 
 export interface AppConfig<S,M> {
   update(msg: M, state: S): StateAndEffect<S,M>;
-  view(state: S): RootNode<M>;
+  view(state: S): Html<M>;
   init(): StateAndEffect<S,M>;
   inputs: Array<Signal<M>>;
   rootElement: Element;
@@ -42,15 +43,16 @@ export function app<S,M>(config: AppConfig<S,M>): Signal<S> {
       return next[0];
     });
 
-  const initialView: RootNode<M> =
+  const initialView: Html<M> =
     config.view(initialState[0]);
 
   const schedule: Scheduler<M> =
     scene(config.rootElement, initialView, Signal.push(messages));
 
-  const html = state.map((next) => {
-    return config.view(next);
-  });
+  const html: Signal<Html<M>> =
+    state.map((next) => {
+      return config.view(next);
+    });
 
   const tasks: Signal<Effect<M>> =
     stateAndTasks.map((next: StateAndEffect<S,M>) => {
@@ -61,7 +63,7 @@ export function app<S,M>(config: AppConfig<S,M>): Signal<S> {
   Task.execute(tasks, Signal.push(messages));
 
   // Render state updates
-  html.onValue((tree: RootNode<M>) => {
+  html.onValue((tree: Html<M>) => {
     schedule(tree);
   });
 
