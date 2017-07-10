@@ -1,12 +1,12 @@
-import * as Html from '../src/html';
-import { NodeType, VNode } from '../src/elements';
+import * as Dom from '../src/html';
+import { NodeType, VNode, Html } from '../src/elements';
 import { assert } from 'chai';
 
 
 describe('Html', function() {
   describe('div', function() {
     it('should create empty div', function() {
-      const actual: Html.Html<any> = Html.div([], []);
+      const actual: Html<any> = Dom.div([], []);
       const expected: VNode<void> = {
         type: NodeType.NODE,
         tag: 'div',
