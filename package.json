@@ -1,6 +1,6 @@
 {
   "name": "@frampton/dom",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A virtual DOM library built on functional-reactive principles",
   "main": "./dist/bundles/dom.js",
   "module": "./dist/index.js",
