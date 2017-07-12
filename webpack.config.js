@@ -31,9 +31,6 @@ module.exports = {
     "@frampton/core": {
       commonjs2: "@frampton/core"
     },
-    "@frampton/style": {
-      commonjs2: "@frampton/style"
-    },
     "@frampton/events": {
       commonjs2: "@frampton/events"
     }
