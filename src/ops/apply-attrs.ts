@@ -31,7 +31,16 @@ export function applyAttr<T>(element: HTMLElement, key: string, attr: Attribute<
       break;
 
     case AttrType.PROPERTY:
-      (<any>element)[key] = attr.value;
+      if (key === 'value' && ((<HTMLInputElement>element).type === 'text' || (<HTMLInputElement>element).type === 'textarea')) {
+        const cursor: number = (<HTMLInputElement>element).selectionStart;
+        (<any>element)[key] = attr.value;
+        (<HTMLInputElement>element).selectionStart = cursor;
+        (<HTMLInputElement>element).selectionEnd = cursor;
+
+      } else {
+        (<any>element)[key] = attr.value;
+      }
+      
       break;
 
     case AttrType.DATA:

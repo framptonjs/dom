@@ -9,7 +9,6 @@
     "build": "rm -rf ./dist/; tsc -p ./tsconfig.json; webpack --config webpack.config.js;",
     "build:example": "rm -rf ./example/; tsc -p ./tsconfig.example.json; webpack --config webpack.example.config.js;",
     "build:test": "rm -rf ./testing/; tsc -p ./tsconfig.test.json; webpack --config webpack.test.config.js;",
-    "build:run": "npm run build; node ./dist/bundles/frampton-dom.js",
     "test": "npm run build:test; karma start;"
   },
   "author": "Kevin Greene <hightimesteddy@gmail.com>",

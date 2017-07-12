@@ -1,9 +1,10 @@
 import {
-  div, input, button, text,
-  Html, Attributes, scene, Events, RootNode
+  Elements, Html, Attributes, scene, Events, RootNode
 } from './index';
 import { eventValue } from '@frampton/events';
 
+
+const { div, input, button, text } = Elements;
 
 const root: Element =
   document.getElementById('root');
